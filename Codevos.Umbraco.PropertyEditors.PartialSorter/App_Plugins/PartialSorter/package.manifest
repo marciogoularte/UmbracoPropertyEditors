@@ -1,0 +1,29 @@
+﻿{   
+    propertyEditors: [      
+        {
+            alias: "Codevos.PartialSorter",
+            name: "Codevos Partial Sorter",
+            editor: {
+                view: "~/App_Plugins/PartialSorter/codevos.partialsorter.editor.html",
+				valueType: "JSON"
+            },
+			prevalues: {
+				fields:[
+                    {
+                        label: "JSON source file",
+                        description: "The JSON file containing the document type / partial view mappings",
+                        key: "jsonConfigUrl",
+                        view: "requiredfield"
+                    }
+				]
+            },
+			defaultConfig: {
+				jsonConfigUrl: "~/Config/codevos.partialsorter.config.js"
+			}
+        }
+    ]
+    ,
+    javascript: [
+        "~/App_Plugins/PartialSorter/codevos.partialsorter.controller.js"
+    ]
+}

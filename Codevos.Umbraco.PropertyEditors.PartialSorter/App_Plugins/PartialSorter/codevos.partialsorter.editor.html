@@ -1,0 +1,12 @@
+﻿<div class="codevos-editor codevos-partialsorter" ng-controller="Codevos.PartialSorterController">
+    <em ng-show="loading">Loading partials configuration...</em>
+
+    <em ng-show="!loading && error">Error loading JSON data</em>
+
+    <div class="codevos-partialsorter-doctype" ng-repeat="docType in docTypes" ng-show="!loading">
+        <strong>{{translate(docType)}}</strong>
+        <ul ui-sortable="sortableOptions" ng-model="docType.partials">
+            <li ng-repeat="partial in docType.partials"><i class="icon-navigation"></i> {{translate(partial)}}</li>
+        </ul>
+    </div>
+</div>

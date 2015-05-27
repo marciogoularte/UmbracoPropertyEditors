@@ -1,0 +1,8 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@{
+    Layout = null;
+}
+
+<h1>@Model.Content.FirstChild().GetPropertyValue("sortorder")</h1>
+
+@Html.SortedPartials(Model.Content, Model)
