@@ -1,2 +1,2 @@
 # PartialSorter
-PartialSorter is an Umbraco Property editor which enables sortable partial views.
+PartialSorter is an Umbraco Property Editor which enables sortable partial views.
