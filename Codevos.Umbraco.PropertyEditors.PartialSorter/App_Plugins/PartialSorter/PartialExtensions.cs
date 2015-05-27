@@ -84,7 +84,7 @@ namespace System.Web.Mvc.Html
 
             if (homePage != null)
             {
-                IPublishedContent settingsPage = homePage.Children.Where(c => c.DocumentTypeAlias.EndsWith("settings", StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+                IPublishedContent settingsPage = homePage.Children.FirstOrDefault(c => c.DocumentTypeAlias.EndsWith("settings", StringComparison.OrdinalIgnoreCase));
 
                 if (settingsPage != null)
                 {
