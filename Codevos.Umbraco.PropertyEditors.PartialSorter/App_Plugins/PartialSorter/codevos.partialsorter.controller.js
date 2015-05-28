@@ -74,7 +74,7 @@
         addWatch();
     };
 
-    var location = window.location.toString()
+    var location = window.location.toString();
 
     $http.get(location.substring(0, location.indexOf('#')) + '/backoffice/api/partialsorterconfig/get', { params: { pageId: $routeParams.id, propertyAlias: $scope.model.alias } })
     .success(function (data) {
