@@ -76,7 +76,7 @@ namespace Codevos.Umbraco.PropertyEditors.PartialSorter
             {
                 ServiceContext services = ApplicationContext.Current.Services;
                 IContentService contentService = services.ContentService;
-                IContent settingsPage = contentService.GetPublishedVersion(pageId);
+                IContent settingsPage = contentService.GetById(pageId);
 
                 PropertyType property = settingsPage.ContentType.PropertyTypes.FirstOrDefault(p => p.Alias == propertyAlias);
 

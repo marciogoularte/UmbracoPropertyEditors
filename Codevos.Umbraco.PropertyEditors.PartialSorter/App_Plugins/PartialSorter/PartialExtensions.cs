@@ -15,9 +15,9 @@ namespace System.Web.Mvc.Html
     /// </summary>
     public static class PartialExtensions
     {
-        private static void GetSortedPartialsForDocumentType(IPublishedContent settingsPage, string documentTypeAlias, string propertyAlias, HashSet<string> partials)
+        private static void GetSortedPartialsForDocumentType(IPublishedContent sorterPage, string sorterPropertyAlias, string documentTypeAlias, HashSet<string> partials)
         {
-            JObject sortValues = settingsPage.GetPropertyValue(propertyAlias) as JObject;
+            JObject sortValues = sorterPage.GetPropertyValue(sorterPropertyAlias) as JObject;
 
             if (sortValues != null)
             {
@@ -33,9 +33,9 @@ namespace System.Web.Mvc.Html
             }
         }
 
-        private static void MergeSortedPartialsWithDefaultConfig(int settingsPageId, string documentTypeAlias, string propertyAlias, HashSet<string> partials)
+        private static void MergeSortedPartialsWithDefaultConfig(int sorterPageId, string sorterPropertyAlias, string documentTypeAlias, HashSet<string> partials)
         {
-            JObject config = Config.GetConfiguration(settingsPageId, propertyAlias);
+            JObject config = Config.GetConfiguration(sorterPageId, sorterPropertyAlias);
 
             if (config != null)
             {
@@ -67,46 +67,54 @@ namespace System.Web.Mvc.Html
         }
 
         /// <summary>
-        /// <para>Checks the template settings node for a property with the given alias.</para>
-        /// <para>When the property exists, it's JSON value is used to render a list of partial views, based on the page's document type alias.</para>
-        /// <para>If the document type alias doesn't exist, the partial names from the JSON config file are used.</para>
+        /// <para>Renders a sorted list of partials.</para>
+        /// <para>The sortorder is based on the PartialSorter JSON configuration, merged with the PartialSorter property value.</para>
         /// </summary>
         /// <param name="helper">The helper.</param>
         /// <param name="page">The content page to render the partial views for.</param>
-        /// <param name="propertyAlias">The PartialSorter property alias.</param>
         /// <param name="model">The model to pass to the partials views.</param>
+        /// <param name="sorterPageId">The id of the page containing the PartialSorter property. If empty, the first found child with a document alias ending with 'settings' is used.</param>
+        /// <param name="sorterPropertyAlias">The PartialSorter property alias. If empty, the first found PartialSorter is used.</param>
         /// <returns>All parsed partial views.</returns>
-        public static MvcHtmlString SortedPartials(this HtmlHelper helper, IPublishedContent page, string propertyAlias, object model)
+        public static MvcHtmlString SortedPartials(this HtmlHelper helper, IPublishedContent page, object model, int sorterPageId = 0, string sorterPropertyAlias = null)
         {
             HashSet<string> partials = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            
-            IPublishedContent homePage = page.AncestorOrSelf(1);
+            UmbracoHelper umbracoHelper = new UmbracoHelper(UmbracoContext.Current);
 
-            if (homePage != null)
+            IPublishedContent sorterPage = null;
+
+            if (sorterPageId > 0)
             {
-                IPublishedContent settingsPage = homePage.Children.FirstOrDefault(c => c.DocumentTypeAlias.EndsWith("settings", StringComparison.OrdinalIgnoreCase));
-
-                if (settingsPage != null)
+                sorterPage = umbracoHelper.TypedContent(sorterPageId);
+            }
+            else
+            {
+                IPublishedContent homePage = page.AncestorOrSelf(1);
+                if (homePage != null)
                 {
-                    if (String.IsNullOrEmpty(propertyAlias))
-                    {
-                        PublishedPropertyType propertyType = settingsPage.ContentType.PropertyTypes.FirstOrDefault(p => p.PropertyEditorAlias == Constants.PropertyEditor.Alias);
-
-                        if (propertyType != null)
-                        {
-                            propertyAlias = propertyType.PropertyTypeAlias;
-                        }                      
-                    }
-
-                    if (!String.IsNullOrEmpty(propertyAlias))
-                    {
-                        GetSortedPartialsForDocumentType(settingsPage, page.DocumentTypeAlias, propertyAlias, partials);
-                    }
-                    
-                    MergeSortedPartialsWithDefaultConfig(settingsPage.Id, page.DocumentTypeAlias, propertyAlias, partials);
+                    sorterPage = homePage.Children.FirstOrDefault(c => c.DocumentTypeAlias.EndsWith("settings", StringComparison.OrdinalIgnoreCase));
                 }
             }
-           
+
+            if (sorterPage != null)
+            {
+                if (String.IsNullOrWhiteSpace(sorterPropertyAlias))
+                {
+                    PublishedPropertyType propertyType = sorterPage.ContentType.PropertyTypes.FirstOrDefault(p => p.PropertyEditorAlias == Constants.PropertyEditor.Alias);
+                    
+                    if (propertyType != null)
+                    {
+                        sorterPropertyAlias = propertyType.PropertyTypeAlias;
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(sorterPropertyAlias))
+                {
+                    GetSortedPartialsForDocumentType(sorterPage, sorterPropertyAlias, page.DocumentTypeAlias, partials);
+                    MergeSortedPartialsWithDefaultConfig(sorterPage.Id, sorterPropertyAlias, page.DocumentTypeAlias, partials);
+                }
+            }
+          
             StringBuilder outputBuilder = new StringBuilder();
 
             foreach (string partial in partials)
@@ -118,20 +126,6 @@ namespace System.Web.Mvc.Html
             }
 
             return outputBuilder.Length > 0 ? new MvcHtmlString(outputBuilder.ToString()) : null;
-        }
-
-        /// <summary>
-        /// <para>Gets the first property with the PartialSorter type from the template settings node.</para>
-        /// <para>When the property exists, it's JSON value is used to render a list of partial views, based on the page's document type alias.</para>
-        /// <para>If the document type alias doesn't exist, the partial names from the JSON config file are used.</para>
-        /// </summary>
-        /// <param name="helper">The helper.</param>
-        /// <param name="page">The content page to render the partial views for.</param>
-        /// <param name="model">The model to pass to the partials views.</param>
-        /// <returns>All parsed partial views.</returns>
-        public static MvcHtmlString SortedPartials(this HtmlHelper helper, IPublishedContent page, object model)
-        {
-            return SortedPartials(helper, page, null, model);
         }
     }
 }
