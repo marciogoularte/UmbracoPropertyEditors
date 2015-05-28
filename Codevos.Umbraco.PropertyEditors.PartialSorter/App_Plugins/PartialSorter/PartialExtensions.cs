@@ -79,13 +79,12 @@ namespace System.Web.Mvc.Html
         public static MvcHtmlString SortedPartials(this HtmlHelper helper, IPublishedContent page, object model, int sorterPageId = 0, string sorterPropertyAlias = null)
         {
             HashSet<string> partials = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            UmbracoHelper umbracoHelper = new UmbracoHelper(UmbracoContext.Current);
 
             IPublishedContent sorterPage = null;
 
             if (sorterPageId > 0)
             {
-                sorterPage = umbracoHelper.TypedContent(sorterPageId);
+                sorterPage = new UmbracoHelper(UmbracoContext.Current).TypedContent(sorterPageId);
             }
             else
             {
